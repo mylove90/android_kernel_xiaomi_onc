@@ -109,4 +109,5 @@ obj-$(CONFIG_MSM_BAM_DMUX) += bam_dmux.o
 obj-$(CONFIG_WCNSS_CORE) += wcnss/
 obj-$(CONFIG_BIG_CLUSTER_MIN_FREQ_ADJUST) += big_cluster_min_freq_adjust.o
 # Add fuse state check by jiang lei 20180621
+obj-$(CONFIG_STATE_NOTIFIER) += state_notifier.o
 obj-y += serial_num.o
