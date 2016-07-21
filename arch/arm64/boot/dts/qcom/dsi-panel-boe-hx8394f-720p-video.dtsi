@@ -129,5 +129,7 @@
 		qcom,mdss-dsi-panel-status-read-length = <1>;
 		qcom,mdss-dsi-panel-status-value = <0x1c>;
 		qcom,esd-check-enabled;
+		qcom,ulps-enabled;
+		qcom,suspend-ulps-enabled;
 	};
 };
