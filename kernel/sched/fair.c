@@ -7540,10 +7540,12 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu)
 		goto out;
 	}
 
+	rcu_read_lock();
+
 	sd = rcu_dereference(per_cpu(sd_ea, prev_cpu));
 	if (!sd) {
 		target_cpu = prev_cpu;
-		goto out;
+		goto unlock;
 	}
 
 	sync_entity_load_avg(&p->se);
@@ -7553,7 +7555,7 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu)
 				    &fbt_env);
 	if (next_cpu == -1) {
 		target_cpu = prev_cpu;
-		goto out;
+		goto unlock;
 	}
 
 	if (fbt_env.placement_boost || fbt_env.need_idle ||
@@ -7561,7 +7563,7 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu)
 			(!cpumask_test_cpu(prev_cpu, rtg_target) ||
 				cpumask_test_cpu(next_cpu, rtg_target)))) {
 		target_cpu = next_cpu;
-		goto out;
+		goto unlock;
 	}
 
 	/* Unconditionally prefer IDLE CPUs for boosted/prefer_idle tasks */
@@ -7569,7 +7571,7 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu)
 		schedstat_inc(p->se.statistics.nr_wakeups_secb_idle_bt);
 		schedstat_inc(this_rq()->eas_stats.secb_idle_bt);
 		target_cpu = next_cpu;
-		goto out;
+		goto unlock;
 	}
 
 	target_cpu = prev_cpu;
@@ -7603,7 +7605,7 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu)
 			schedstat_inc(p->se.statistics.nr_wakeups_secb_insuff_cap);
 			schedstat_inc(this_rq()->eas_stats.secb_insuff_cap);
 			target_cpu = next_cpu;
-			goto out;
+			goto unlock;
 		}
 
 		/* Check if EAS_CPU_NXT is a more energy efficient CPU */
@@ -7611,18 +7613,20 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu)
 			schedstat_inc(p->se.statistics.nr_wakeups_secb_nrg_sav);
 			schedstat_inc(this_rq()->eas_stats.secb_nrg_sav);
 			target_cpu = eenv.cpu[eenv.next_idx].cpu_id;
-			goto out;
+			goto unlock;
 		}
 
 		schedstat_inc(p->se.statistics.nr_wakeups_secb_no_nrg_sav);
 		schedstat_inc(this_rq()->eas_stats.secb_no_nrg_sav);
 		target_cpu = prev_cpu;
-		goto out;
+		goto unlock;
 	}
 
 	schedstat_inc(p->se.statistics.nr_wakeups_secb_count);
 	schedstat_inc(this_rq()->eas_stats.secb_count);
 
+unlock:
+	rcu_read_unlock();
 out:
 	trace_sched_task_util(p, next_cpu, backup_cpu, target_cpu,
 			      fbt_env.need_idle, fastpath,
