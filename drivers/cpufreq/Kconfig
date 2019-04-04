@@ -287,6 +287,14 @@ config BASE_BOOST_FREQ
 	  Base frequency for the CPU. It will revert to this
 	  frequency after all boosts have expired.
 
+config TA_STUNE_BOOST
+	int "Foreground app SchedTune boost value"
+	depends on DYNAMIC_STUNE_BOOST
+	default "15"
+	help
+	  SchedTune boost value for the foreground app. This alters the
+	  perceived load in order to bias CPU and frequency selection.
+
 config INPUT_BOOST_FREQ
 	int "CPU input boost freq"
 	default "0"
