@@ -103,20 +103,11 @@ static void fdatawait_one_bdev(struct block_device *bdev, void *arg)
  * Sync all the data for all the filesystems (called by sys_sync() and
  * emergency sync)
  */
-void sync_filesystems(int nowait)
+void sync_filesystems(int wait)
 {
-	/*
-	 * Sync twice to reduce the possibility we skipped some inodes / pages
-	 * because they were temporarily locked
-	 */
-
-	iterate_supers(sync_inodes_one_sb, &nowait);
-	iterate_supers(sync_fs_one_sb, &nowait);
-	iterate_bdevs(fdatawrite_one_bdev, NULL);
-	iterate_bdevs(fdatawait_one_bdev, NULL);
-
-	iterate_supers(sync_inodes_one_sb, &nowait);
-	iterate_supers(sync_fs_one_sb, &nowait);
+	iterate_supers(sync_inodes_one_sb, NULL);
+	iterate_supers(sync_fs_one_sb, &wait);
+	iterate_supers(sync_fs_one_sb, &wait);
 	iterate_bdevs(fdatawrite_one_bdev, NULL);
 	iterate_bdevs(fdatawait_one_bdev, NULL);
 }
@@ -185,6 +176,14 @@ SYSCALL_DEFINE1(syncfs, int, fd)
 	struct super_block *sb;
 	int ret;
 
+	#ifdef CONFIG_DYNAMIC_FSYNC
+	if (likely(dyn_fsync_active && suspend_active))
+		return 0;
+	#endif
+	
+	if (!fsync_enabled)
+		return 0;
+
 	if (!f.file)
 		return -EBADF;
 	sb = f.file->f_path.dentry->d_sb;
@@ -213,9 +212,12 @@ int vfs_fsync_range(struct file *file, loff_t start, loff_t end, int datasync)
 	struct inode *inode = file->f_mapping->host;
 
 #ifdef CONFIG_DYNAMIC_FSYNC
-	if (dyn_fsync_active && suspend_active)
+	if (likely(dyn_fsync_active && suspend_active))
 		return 0;
-#endif
+#endif	
+
+	if (!fsync_enabled)
+		return 0;
 
 	if (!file->f_op->fsync)
 		return -EINVAL;
@@ -247,6 +249,14 @@ static int do_fsync(unsigned int fd, int datasync)
 {
 	struct fd f = fdget(fd);
 	int ret = -EBADF;
+
+#ifdef CONFIG_DYNAMIC_FSYNC
+	if (likely(dyn_fsync_active && suspend_active))
+		return 0;
+#endif
+
+	if (!fsync_enabled)
+		return 0;
 
 	if (f.file) {
 		ret = vfs_fsync(f.file, datasync);
@@ -333,9 +343,12 @@ SYSCALL_DEFINE4(sync_file_range, int, fd, loff_t, offset, loff_t, nbytes,
 	umode_t i_mode;
 
 #ifdef CONFIG_DYNAMIC_FSYNC
-	if (dyn_fsync_active && suspend_active)
+	if (likely(dyn_fsync_active && suspend_active))
 		return 0;
 #endif
+	
+	if (!fsync_enabled)
+		return 0;
 
 	ret = -EINVAL;
 	if (flags & ~VALID_FLAGS)
