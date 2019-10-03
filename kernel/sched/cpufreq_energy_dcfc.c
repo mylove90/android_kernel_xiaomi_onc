@@ -215,8 +215,8 @@ static unsigned int get_next_freq(struct nrggov_policy *sg_policy,
 		freq = (freq + (freq >> 1)) * util / max;
 	else 
 		freq = freq * (util + ((util * 10) / 100)) / max;
-		
-	trace_nrggov_next_freq(policy->cpu, util, max, freq);
+
+	trace_sugov_next_freq(policy->cpu, util, max, freq);
 
 	if (freq == sg_policy->cached_raw_freq && sg_policy->next_freq != UINT_MAX)
 		return sg_policy->next_freq;
@@ -484,7 +484,7 @@ static void nrggov_update_single(struct update_util_data *hook, u64 time,
 		sg_cpu->flags = flags;
 		nrggov_calc_avg_cap(sg_policy, sg_cpu->walt_load.ws,
 				   sg_policy->policy->cur);
-		trace_nrggov_util_update(sg_cpu->cpu, sg_cpu->util,
+		trace_sugov_util_update(sg_cpu->cpu, sg_cpu->util,
 					sg_policy->avg_cap,
 					max, sg_cpu->walt_load.nl,
 					sg_cpu->walt_load.pl, flags);
@@ -605,7 +605,7 @@ static void nrggov_update_shared(struct update_util_data *hook, u64 time,
 	nrggov_calc_avg_cap(sg_policy, sg_cpu->walt_load.ws,
 			   sg_policy->policy->cur);
 
-	trace_nrggov_util_update(sg_cpu->cpu, sg_cpu->util, sg_policy->avg_cap,
+	trace_sugov_util_update(sg_cpu->cpu, sg_cpu->util, sg_policy->avg_cap,
 				max, sg_cpu->walt_load.nl,
 				sg_cpu->walt_load.pl, flags);
 
