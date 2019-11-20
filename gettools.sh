@@ -25,3 +25,7 @@ if [ ! -d clang ]; then
     tar xvzf clang-4691093.tar.gz -C clang/clang-4691093
     rm clang-4691093.tar.gz
 fi
+
+# Make a backup for the toolchain to refresh after cleaning by clean.sh script
+#  (avoiding build bug)
+tar cjvf ../toolchain.tbz stock stock_32 clang
