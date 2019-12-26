@@ -90,6 +90,9 @@
 
 #define MAX_CC_STEPS			20
 
+#define DEFAULT_HIGH_TEMP_UPDATE_THRESHOLD	550
+#define HIGH_TEMP_UPDATE_CHECK		30000
+
 enum prof_load_status {
 	PROFILE_MISSING,
 	PROFILE_LOADED,
@@ -333,6 +336,8 @@ struct fg_dt_props {
 	int	ki_coeff_hi_dischg[KI_COEFF_SOC_LEVELS];
 	int	slope_limit_coeffs[SLOPE_LIMIT_NUM_COEFFS];
 	u8	batt_therm_coeffs[BATT_THERM_NUM_COEFFS];
+	int	batt_psy_is_bms;
+	u32	batt_update_high_temp_threshold;
 };
 
 /* parameters from battery profile */
@@ -514,9 +519,12 @@ struct fg_chip {
 	struct delayed_work	ttf_work;
 	struct delayed_work	sram_dump_work;
 	struct delayed_work	pl_enable_work;
+	struct delayed_work	temp_notify_work;
 	struct work_struct	esr_filter_work;
 	struct alarm		esr_filter_alarm;
 	ktime_t			last_delta_temp_time;
+	int			batt_temp;
+	bool			monitor_batt_temp;
 };
 
 /* Debugfs data structures are below */
