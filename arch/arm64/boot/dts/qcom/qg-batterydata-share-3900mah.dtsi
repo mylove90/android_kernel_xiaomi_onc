@@ -15,7 +15,7 @@ qcom,share_3900mah {
 	/* Ascent_wConn_3450mAh_Fresh_averaged_MasterSlave_Feb7th2018 */
 	qcom,max-voltage-uv = <4400000>;
 	qcom,fg-cc-cv-threshold-mv = <4390>;
-	qcom,fastchg-current-ma = <2000>;
+	qcom,fastchg-current-ma = <2500>;
 	qcom,batt-id-kohm = <666>;
 	qcom,battery-beta = <3435>;
 	qcom,battery-therm-kohm = <10>;
@@ -25,7 +25,7 @@ qcom,share_3900mah {
 
 	qcom,jeita-fcc-ranges = <0   50  390000
 				51  150  1170000
-				151 450  2000000
+				151 450  2500000
 				451 600  1950000>;
 	qcom,jeita-fv-ranges = <0   50  4400000
 				51  150  4400000

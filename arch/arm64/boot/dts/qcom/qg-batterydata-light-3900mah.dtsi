@@ -2,7 +2,7 @@ qcom,light_3900mah {
     /* 3668695_LC_M5100_Coslight_4000mAH_averaged_MasterSlave_Oct30th2018 */
     qcom,max-voltage-uv = <4400000>;
     qcom,fg-cc-cv-threshold-uv = <4390000>;
-    qcom,fastchg-current-ma = <2000>;
+    qcom,fastchg-current-ma = <2500>;
     qcom,batt-id-kohm = <100>;
     qcom,battery-beta = <4250>;
     qcom,battery-therm-kohm = <100>;
@@ -11,7 +11,7 @@ qcom,light_3900mah {
 
 	qcom,jeita-fcc-ranges = <0   50  390000
 				51  150  1170000
-				151 450  2000000
+				151 450  2500000
 				451 600  1950000>;
 	qcom,jeita-fv-ranges = <0   50  4400000
 				51  150  4400000

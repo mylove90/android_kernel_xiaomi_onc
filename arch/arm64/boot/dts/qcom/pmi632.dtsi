@@ -320,7 +320,7 @@
 			qcom,hvdcp-disable;
 			qcom,micro-usb;
 			qcom,sw-jeita-enable = <1>;
-			qcom,fcc-max-ua = <2000000>;
+			qcom,fcc-max-ua = <2500000>;
 			qcom,usb-icl-ua = <3000000>;
 			qcom,fv-max-uv =  <4400000>;
 			qcom,chg-term-src = <1>;
