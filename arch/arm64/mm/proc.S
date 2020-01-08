@@ -110,15 +110,18 @@ ENTRY(cpu_do_suspend)
 	mrs	x2, tpidr_el0
 	mrs	x3, tpidrro_el0
 	mrs	x4, contextidr_el1
-	mrs	x5, osdlr_el1
-	mrs	x6, cpacr_el1
-	mrs	x7, tcr_el1
-	mrs	x8, vbar_el1
-	mrs	x9, mdscr_el1
-	mrs	x10, oslsr_el1
-	mrs	x11, sctlr_el1
-	mrs	x12, tpidr_el1
-	mrs	x13, sp_el0
+	mrs	x5, cpacr_el1
+	mrs	x6, tcr_el1
+	mrs	x7, vbar_el1
+	mrs	x8, mdscr_el1
+	mrs	x9, oslsr_el1
+	mrs	x10, sctlr_el1
+alternative_if_not ARM64_HAS_VIRT_HOST_EXTN
+	mrs	x11, tpidr_el1
+alternative_else
+	mrs	x11, tpidr_el2
+alternative_endif
+	mrs	x12, sp_el0
 	stp	x2, x3, [x0]
 	stp	x4, x5, [x0, #16]
 	stp	x6, x7, [x0, #32]
@@ -163,7 +166,11 @@ ENTRY(cpu_do_resume)
 	msr	mdscr_el1, x10
 
 	msr	sctlr_el1, x12
+alternative_if_not ARM64_HAS_VIRT_HOST_EXTN
 	msr	tpidr_el1, x13
+alternative_else
+	msr	tpidr_el2, x13
+alternative_endif
 	msr	sp_el0, x14
 	/*
 	 * Restore oslsr_el1 by writing oslar_el1
