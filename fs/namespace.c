@@ -1738,7 +1738,28 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 dput_and_out:
 	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
 	dput(path.dentry);
+	if (user_request && (!retval || (flags & MNT_FORCE))) {
+		/* filesystem needs to handle unclosed namespaces */
+		if (mnt->mnt.mnt_sb->s_op->umount_end)
+			mnt->mnt.mnt_sb->s_op->umount_end(mnt->mnt.mnt_sb,
+					flags);
+	}
 	mntput_no_expire(mnt);
+
+	if (!user_request)
+		goto out;
+
+	if (!retval) {
+		/*
+		 * If the last delayed_fput() is called during do_umount()
+		 * and makes mnt_count zero, we need to guarantee to register
+		 * delayed_mntput by waiting for delayed_fput work again.
+		 */
+		flush_delayed_fput_wait();
+
+		/* flush delayed_mntput_work to put sb->s_active */
+		flush_delayed_mntput_wait();
+	}
 out:
 	return retval;
 }
