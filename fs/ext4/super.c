@@ -4928,6 +4928,27 @@ struct ext4_mount_options {
 #endif
 };
 
+static void ext4_umount_end(struct super_block *sb, int flags)
+{
+	/*
+	 * this is called at the end of umount(2). If there is an unclosed
+	 * namespace, ext4 won't do put_super() which triggers fsck in the
+	 * next boot.
+	 */
+	if ((flags & MNT_FORCE) || atomic_read(&sb->s_active) > 1) {
+		if (test_opt(sb, ERRORS_PANIC)) {
+			ext4_msg(sb, KERN_ERR,
+				"errors=remount-ro for active namespaces on umount %x",
+						flags);
+			clear_opt(sb, ERRORS_PANIC);
+			set_opt(sb, ERRORS_RO);
+		}
+		/* to write the latest s_kbytes_written */
+		if (!(sb->s_flags & MS_RDONLY))
+			ext4_commit_super(sb, 1);
+	}
+}
+
 static int ext4_remount(struct super_block *sb, int *flags, char *data)
 {
 	struct ext4_super_block *es;
