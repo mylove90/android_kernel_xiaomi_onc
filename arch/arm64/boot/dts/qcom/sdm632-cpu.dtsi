@@ -242,6 +242,7 @@
 
 		CPU_COST_0: core-cost0 {
 			busy-cost-data = <
+				307200	7
 				614400	23
 				883200	41
 				1036800	56
@@ -256,6 +257,7 @@
 		};
 		CPU_COST_1: core-cost1 {
 			busy-cost-data = <
+				307200	111
 				633600	722
 				902400	1287
 				1094400	1739
@@ -271,6 +273,7 @@
 		};
 		CLUSTER_COST_0: cluster-cost0 {
 			busy-cost-data = <
+				307200	2
 				614400	8
 				883200	14
 				1036800	18
@@ -285,6 +288,7 @@
 		};
 		CLUSTER_COST_1: cluster-cost1 {
 			busy-cost-data = <
+				307200	31
 				633600	68
 				902400	103
 				1094400	132
