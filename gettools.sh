@@ -23,3 +23,11 @@ if [ ! -d clang ]; then
     tar xvzf clang-r353983c.tar.gz -C clang/clang-r353983c
     rm clang-r353983c.tar.gz
 fi
+
+# Download libufdt
+if [ ! -d libufdt ]; then
+    wget https://android.googlesource.com/platform/system/libufdt/+archive/refs/tags/android-10.0.0_r29/utils.tar.gz
+    mkdir -p libufdt
+    tar xvzf utils.tar.gz -C libufdt
+    rm utils.tar.gz
+fi

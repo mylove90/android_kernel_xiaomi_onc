@@ -49,10 +49,12 @@ for MODULES in $(find "${OUTDIR}" -name '*.ko'); do
             "${MODULES}"
     find "${OUTDIR}" -name '*.ko' -exec cp {} "${VENDOR_MODULEDIR}" \;
 done
+cd libufdt/src && python mkdtboimg.py create $OUTDIR/arch/arm64/boot/dtbo.img $OUTDIR/arch/arm64/boot/dts/qcom/*.dtbo
 echo -e "\n(i) Done moving modules"
 
 cd $ZIP_DIR
 cp $KERN_IMG zImage
+cp $OUTDIR/arch/arm64/boot/dtbo.img $ZIP_DIR
 make normal &>/dev/null
 echo "Flashable zip generated under $ZIP_DIR."
 cd ..
