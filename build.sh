@@ -11,7 +11,7 @@ ZIP_DIR=$KERNEL_DIR/AnyKernel3
 CONFIG=onclite-perf_defconfig
 CROSS_COMPILE="aarch64-linux-android-"
 CROSS_COMPILE_ARM32="arm-linux-androideabi-"
-PATH="${KERNEL_DIR}/stock/bin:${PATH}:${KERNEL_DIR}/stock_32/bin:${PATH}"
+PATH=:"${KERNEL_DIR}/clang/clang-r353983c/bin:${PATH}:${KERNEL_DIR}/stock/bin:${PATH}:${KERNEL_DIR}/stock_32/bin:${PATH}"
 
 # Export
 export ARCH=arm64
@@ -24,16 +24,35 @@ sudo apt install bc bash git-core gnupg build-essential \
     m4 gcc libtool zlib1g-dev flex
 
 # Clone toolchain
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android-9.0.0_r45 --depth=1 stock
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 -b android-9.0.0_r45 --depth=1 stock_32
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android-10.0.0_r29 --depth=1 stock
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 -b android-10.0.0_r29 --depth=1 stock_32
 
 # Clone AnyKernel3
-git clone https://github.com/rama982/AnyKernel3 -b onc-miui
+git clone https://github.com/mylove90/AnyKernel3
+
+# Download libufdt
+if [ ! -d libufdt ]; then
+    wget https://android.googlesource.com/platform/system/libufdt/+archive/refs/tags/android-10.0.0_r29/utils.tar.gz
+    mkdir -p libufdt
+    tar xvzf utils.tar.gz -C libufdt
+    rm utils.tar.gz
+fi
+
+#Download Clang
+if [ ! -d clang ]; then
+    wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/tags/android-10.0.0_r29/clang-r353983c.tar.gz
+    mkdir -p clang/clang-r353983c/
+    tar xvzf clang-r353983c.tar.gz -C clang/clang-r353983c
+    rm clang-r353983c.tar.gz
+fi
 
 # Build start
 make O=out $CONFIG
-make -j$(nproc --all) O=out
-
+make -j$(nproc --all) O=out \
+                      ARCH=arm64 \
+                      CC=clang \
+CLANG_TRIPLE=aarch64-linux-gnu- \
+CROSS_COMPILE=aarch64-linux-android-
 if ! [ -a $KERN_IMG ]; then
     echo "Build error!"
     exit 1
@@ -63,9 +82,10 @@ for MODULES in $(find "${OUTDIR}" -name '*.ko'); do
 done
 echo -e "\n(i) Done moving modules"
 rm "${VENDOR_MODULEDIR}/wlan.ko"
-
+cd libufdt/src && python mkdtboimg.py create $OUTDIR/arch/arm64/boot/dtbo.img $OUTDIR/arch/arm64/boot/dts/qcom/*.dtbo
 cd $ZIP_DIR
 cp $KERN_IMG zImage
+cp $OUTDIR/arch/arm64/boot/dtbo.img $ZIP_DIR
 make normal &>/dev/null
 echo "Flashable zip generated under $ZIP_DIR."
 cd ..
