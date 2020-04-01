@@ -627,12 +627,12 @@ int himax_ts_register_interrupt(struct i2c_client *client)
 				I("%s edge triiger falling\n ", __func__);
 				ret = request_threaded_irq(client->irq,
 				NULL, himax_ts_thread, IRQF_TRIGGER_FALLING
-				| IRQF_ONESHOT, client->name, ts);
+				| IRQF_ONESHOT | IRQF_PERF_CRITICAL, client->name, ts);
 			} else {
 				I("%s level trigger low\n ", __func__);
 				ret = request_threaded_irq(client->irq,
 				NULL, himax_ts_thread, IRQF_TRIGGER_LOW
-				| IRQF_ONESHOT, client->name, ts);
+				| IRQF_ONESHOT | IRQF_PERF_CRITICAL, client->name, ts);
 			}
 		if (ret == 0) {
 			ts->irq_enabled = 1;
